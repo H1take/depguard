@@ -1,0 +1,72 @@
+[
+  {
+    "name": "axios",
+    "currentRange": "^1.6.0",
+    "updatedVersion": "1.9.0"
+  },
+  {
+    "name": "chalk",
+    "currentRange": "^5.3.0",
+    "updatedVersion": "5.4.1"
+  },
+  {
+    "name": "commander",
+    "currentRange": "^11.0.0",
+    "updatedVersion": "14.0.0"
+  },
+  {
+    "name": "semver",
+    "currentRange": "^7.5.4",
+    "updatedVersion": "7.7.2"
+  },
+  {
+    "name": "@types/semver",
+    "currentRange": "^7.7.0",
+    "updatedVersion": "7.7.0"
+  },
+  {
+    "name": "@typescript-eslint/eslint-plugin",
+    "currentRange": "^8.32.1",
+    "updatedVersion": "8.32.1"
+  },
+  {
+    "name": "@typescript-eslint/parser",
+    "currentRange": "^8.32.1",
+    "updatedVersion": "8.32.1"
+  },
+  {
+    "name": "eslint",
+    "currentRange": "^9.27.0",
+    "updatedVersion": "9.27.0"
+  },
+  {
+    "name": "eslint-config-prettier",
+    "currentRange": "^10.1.5",
+    "updatedVersion": "10.1.5"
+  },
+  {
+    "name": "eslint-plugin-import",
+    "currentRange": "^2.31.0",
+    "updatedVersion": "2.31.0"
+  },
+  {
+    "name": "eslint-plugin-node",
+    "currentRange": "^11.1.0",
+    "updatedVersion": "11.1.0"
+  },
+  {
+    "name": "prettier",
+    "currentRange": "^3.5.3",
+    "updatedVersion": "3.5.3"
+  },
+  {
+    "name": "ts-node",
+    "currentRange": "^10.9.2",
+    "updatedVersion": "10.9.2"
+  },
+  {
+    "name": "typescript",
+    "currentRange": "^5.8.3",
+    "updatedVersion": "5.8.3"
+  }
+]
