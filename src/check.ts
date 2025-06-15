@@ -8,10 +8,14 @@ import { PackageManager } from './types/package-manager';
 
 export class Check {
   private config = new Config();
-  private packageManager!: PackageManager;
+  private packageManager: PackageManager | null = null;
 
   constructor() {
-    this.initializePackageManager();
+    // Initialize package manager synchronously
+    this.initializePackageManager().catch(error => {
+      console.error('Failed to initialize package manager:', error);
+      process.exit(1);
+    });
   }
 
   private async initializePackageManager() {
@@ -19,6 +23,10 @@ export class Check {
   }
 
   public async checkUpdates(): Promise<void> {
+    if (!this.packageManager) {
+      throw new Error('Package manager not initialized');
+    }
+
     const { exclude } = this.config.loadConfig();
     const pkgPath = path.resolve(process.cwd(), 'package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));

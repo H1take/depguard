@@ -1,6 +1,6 @@
 {
   "name": "depguard",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A powerful CLI tool to check and update npm/yarn dependencies in your projects",
   "main": "dist/cli.js",
   "bin": {
