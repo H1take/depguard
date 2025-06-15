@@ -124,4 +124,4 @@ MIT
 
 ## Author
 
-Dmitriy Yakovlev - [@dmitriyyakovlev](https://github.com/h1take) 
+Dmitriy Yakovlev - [@h1take](https://github.com/h1take) 
