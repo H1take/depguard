@@ -4,8 +4,8 @@ import { execSync } from 'child_process';
 import axios from 'axios';
 import semver from 'semver';
 import chalk from 'chalk';
-import { IUpdateOptions, IUpdatePackage } from '@/types/update.type';
-import { Config } from '@/config/config';
+import { IUpdateOptions, IUpdatePackage } from './types/update.type';
+import { Config } from './config/config';
 
 export class Update {
   private config = new Config();

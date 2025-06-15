@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { IConfig } from '@/types/config.type';
+import { IConfig } from '../types/config.type';
 
 export class Config {
   private configPath = path.resolve(process.cwd(), 'dep-checker.config.json');
