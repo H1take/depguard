@@ -1,8 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { Check, Update, Config, PackageManagerFactory } from 'depguard';
-import { PackageManager } from '../types/package-manager';
-import type { IConfig, IUpdateOptions, IUpdatePackage } from 'depguard';
+import { Check } from '../check';
+import { Update } from '../update';
+import { Config } from '../config/config';
+import { PackageManagerFactory } from '../package-managers/factory';
+import type { IUpdateOptions, IUpdatePackage } from '../types/update.type';
+import type { IConfig } from '../types/config.type';
+import type { PackageManager } from '../types/package-manager';
 
 jest.mock('fs');
 jest.mock('path');
