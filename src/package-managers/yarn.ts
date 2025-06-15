@@ -1,31 +1,36 @@
-import axios from 'axios';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { execSync } from 'child_process';
 import { PackageManager } from '../types/package-manager';
 
-const execAsync = promisify(exec);
-
 export class YarnPackageManager implements PackageManager {
-  name = 'yarn';
+  public name = 'yarn';
 
-  async getLatestVersion(packageName: string): Promise<string | null> {
+  public async initialize(): Promise<void> {
+    // No initialization needed for yarn
+  }
+
+  public async getLatestVersion(packageName: string): Promise<string | null> {
     try {
-      const res = await axios.get(`https://registry.npmjs.org/${packageName}/latest`);
-      return res.data.version;
-    } catch {
+      const output = execSync(`yarn info ${packageName} version`, { encoding: 'utf-8' });
+      return output.trim();
+    } catch (error) {
       return null;
     }
   }
 
-  async updatePackage(packageName: string, version: string): Promise<void> {
-    await execAsync(`yarn add ${packageName}@${version} --exact`);
+  public async updatePackage(packageName: string, version: string): Promise<void> {
+    execSync(`yarn add ${packageName}@${version}`, { stdio: 'inherit' });
   }
 
-  async install(): Promise<void> {
-    await execAsync('yarn install');
+  public async updateAllPackages(packages: Array<{ name: string; version: string }>): Promise<void> {
+    const updates = packages.map(pkg => `${pkg.name}@${pkg.version}`).join(' ');
+    execSync(`yarn add ${updates}`, { stdio: 'inherit' });
   }
 
-  getLockFile(): string {
+  public async install(): Promise<void> {
+    execSync('yarn install', { stdio: 'inherit' });
+  }
+
+  public getLockFile(): string {
     return 'yarn.lock';
   }
 

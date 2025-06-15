@@ -1,9 +1,9 @@
+import { execSync } from 'child_process';
 import { YarnPackageManager } from '../../package-managers/yarn';
-import axios from 'axios';
-import { exec } from 'child_process';
 
-jest.mock('axios');
-jest.mock('child_process');
+jest.mock('child_process', () => ({
+  execSync: jest.fn()
+}));
 
 describe('YarnPackageManager', () => {
   let manager: YarnPackageManager;
@@ -15,44 +15,49 @@ describe('YarnPackageManager', () => {
 
   describe('getLatestVersion', () => {
     it('should return latest version when successful', async () => {
-      const mockResponse = { data: { version: '2.0.0' } };
-      (axios.get as jest.Mock).mockResolvedValue(mockResponse);
+      (execSync as jest.Mock).mockReturnValue('2.0.0\n');
 
       const result = await manager.getLatestVersion('test-package');
       expect(result).toBe('2.0.0');
-      expect(axios.get).toHaveBeenCalledWith('https://registry.npmjs.org/test-package/latest');
+      expect(execSync).toHaveBeenCalledWith('yarn info test-package version', { encoding: 'utf-8' });
     });
 
-    it('should return null when request fails', async () => {
-      (axios.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+    it('should return null when version fetch fails', async () => {
+      (execSync as jest.Mock).mockImplementation(() => {
+        throw new Error('Failed to fetch version');
+      });
 
       const result = await manager.getLatestVersion('test-package');
       expect(result).toBeNull();
+      // Reset mock after error test
+      (execSync as jest.Mock).mockReset();
     });
   });
 
   describe('updatePackage', () => {
     it('should execute yarn add command', async () => {
-      (exec as unknown as jest.Mock).mockImplementation((cmd, callback) => {
-        callback(null, { stdout: '', stderr: '' });
-      });
-
+      (execSync as jest.Mock).mockReturnValue(undefined);
       await manager.updatePackage('test-package', '2.0.0');
-      expect(exec).toHaveBeenCalledWith(
-        'yarn add test-package@2.0.0 --exact',
-        expect.any(Function)
-      );
+      expect(execSync).toHaveBeenCalledWith('yarn add test-package@2.0.0', { stdio: 'inherit' });
+    });
+  });
+
+  describe('updateAllPackages', () => {
+    it('should execute yarn add command with multiple packages', async () => {
+      (execSync as jest.Mock).mockReturnValue(undefined);
+      await manager.updateAllPackages([
+        { name: 'package1', version: '1.0.0' },
+        { name: 'package2', version: '2.0.0' }
+      ]);
+      expect(execSync).toHaveBeenCalledWith('yarn add package1@1.0.0 package2@2.0.0', { stdio: 'inherit' });
     });
   });
 
   describe('install', () => {
     it('should execute yarn install command', async () => {
-      (exec as unknown as jest.Mock).mockImplementation((cmd, callback) => {
-        callback(null, { stdout: '', stderr: '' });
-      });
-
+      (execSync as jest.Mock).mockReturnValue(undefined);
       await manager.install();
-      expect(exec).toHaveBeenCalledWith('yarn install', expect.any(Function));
+      expect(execSync).toHaveBeenCalledWith('yarn install', { stdio: 'inherit' });
     });
   });
 

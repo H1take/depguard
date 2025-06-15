@@ -1,22 +1,28 @@
-import { PackageManager, PackageManagerType } from '../types/package-manager';
+import fs from 'fs';
+import path from 'path';
 import { NpmPackageManager } from './npm';
 import { YarnPackageManager } from './yarn';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { PackageManager } from '../types/package-manager';
 
 export class PackageManagerFactory {
-  static async create(): Promise<PackageManager> {
-    const packageManager = await this.detectPackageManager();
-    return packageManager === 'yarn' ? new YarnPackageManager() : new NpmPackageManager();
+  public static async create(): Promise<PackageManager> {
+    const packageManager = this.createSync();
+    await packageManager.initialize();
+    return packageManager;
   }
 
-  private static async detectPackageManager(): Promise<PackageManagerType> {
-    const yarnLockExists = existsSync(join(process.cwd(), 'yarn.lock'));
-    const packageLockExists = existsSync(join(process.cwd(), 'package-lock.json'));
+  public static createSync(): PackageManager {
+    const cwd = process.cwd();
+    const hasYarnLock = fs.existsSync(path.join(cwd, 'yarn.lock'));
+    const hasPackageLock = fs.existsSync(path.join(cwd, 'package-lock.json'));
 
-    if (yarnLockExists && !packageLockExists) {
-      return 'yarn';
+    if (hasYarnLock) {
+      return new YarnPackageManager();
+    } else if (hasPackageLock) {
+      return new NpmPackageManager();
+    } else {
+      // Default to npm if no lock file is found
+      return new NpmPackageManager();
     }
-    return 'npm';
   }
 } 

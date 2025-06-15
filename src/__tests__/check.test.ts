@@ -1,75 +1,67 @@
-import { Check } from '../check';
-import { PackageManagerFactory } from '../package-managers/factory';
-import { Config } from '../config/config';
+import fs from 'fs';
+import path from 'path';
+import { Check, Update, Config, PackageManagerFactory } from 'depguard';
+import { PackageManager } from '../types/package-manager';
+import type { IConfig, IUpdateOptions, IUpdatePackage } from 'depguard';
 
+jest.mock('fs');
+jest.mock('path');
 jest.mock('../package-managers/factory');
-jest.mock('../config/config');
 
 describe('Check', () => {
   let check: Check;
-  const mockConfig = {
-    loadConfig: jest.fn().mockReturnValue({ exclude: [] })
-  };
-
-  const mockPackageManager = {
-    getLatestVersion: jest.fn(),
-    updatePackage: jest.fn(),
-    install: jest.fn(),
-    getLockFile: jest.fn(),
-    getPackageManager: jest.fn()
-  };
+  let mockPackageManager: PackageManager;
 
   beforeEach(() => {
-    (Config as jest.Mock).mockImplementation(() => mockConfig);
-    (PackageManagerFactory.create as jest.Mock).mockResolvedValue(mockPackageManager);
+    mockPackageManager = {
+      name: 'npm',
+      initialize: jest.fn().mockResolvedValue(undefined),
+      getLatestVersion: jest.fn(),
+      updatePackage: jest.fn(),
+      updateAllPackages: jest.fn(),
+      install: jest.fn(),
+      getLockFile: jest.fn().mockReturnValue('package-lock.json')
+    };
+
+    (PackageManagerFactory.createSync as jest.Mock).mockReturnValue(mockPackageManager);
+    (path.resolve as jest.Mock).mockReturnValue('/test/package.json');
+    (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({
+      dependencies: {
+        'package1': '^1.0.0',
+        'package2': '^2.0.0'
+      },
+      devDependencies: {
+        'package3': '^3.0.0'
+      }
+    }));
+
     check = new Check();
-    jest.clearAllMocks();
   });
 
   describe('checkUpdates', () => {
     it('should check updates for all dependencies', async () => {
-      const mockPackageJson = {
-        dependencies: {
-          'test-package': '^1.0.0'
-        },
-        devDependencies: {
-          'dev-package': '~2.0.0'
-        }
-      };
-
-      mockPackageManager.getLatestVersion.mockResolvedValue('2.0.0');
-
-      // Mock fs.readFileSync
-      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(JSON.stringify(mockPackageJson));
-
-      // Mock console.log
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      (mockPackageManager.getLatestVersion as jest.Mock)
+        .mockResolvedValueOnce('2.0.0')
+        .mockResolvedValueOnce('3.0.0')
+        .mockResolvedValueOnce('4.0.0');
 
       await check.checkUpdates();
 
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledTimes(2);
+      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledTimes(3);
+      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledWith('package1');
+      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledWith('package2');
+      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledWith('package3');
     });
 
     it('should handle failed version fetches', async () => {
-      const mockPackageJson = {
-        dependencies: {
-          'test-package': '^1.0.0'
-        }
-      };
-
-      mockPackageManager.getLatestVersion.mockResolvedValue(null);
-
-      // Mock fs.readFileSync
-      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(JSON.stringify(mockPackageJson));
-
-      // Mock console.log
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      (mockPackageManager.getLatestVersion as jest.Mock)
+        .mockResolvedValueOnce('2.0.0')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('4.0.0');
 
       await check.checkUpdates();
 
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledWith('test-package');
+      expect(mockPackageManager.getLatestVersion).toHaveBeenCalledTimes(3);
     });
   });
 }); 
